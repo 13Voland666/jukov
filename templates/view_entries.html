@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+     <head>
+          <meta charset="UTF-8" />
+          <title>View Entries</title>
+     </head>
+     <body>
+          <h1>All Diary Entries</h1>
+          <ul>
+               {% for entry in entries %}
+               <li><strong>{{ entry.title }}</strong>: {{ entry.content }}</li>
+               {% endfor %}
+          </ul>
+          <a href="{{ url_for('index') }}">Back to Diary</a>
+     </body>
+</html>

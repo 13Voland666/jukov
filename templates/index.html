@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+     <head>
+          <meta charset="UTF-8" />
+          <title>Diary</title>
+          <link
+               rel="stylesheet"
+               href="{{ url_for('static', filename='styles.css') }}" />
+     </head>
+     <body>
+          <h1>Diary Entries</h1>
+          <a href="{{ url_for('add_entry') }}">Add New Entry</a>
+          <ul>
+               {% for entry in entries %}
+               <li><strong>{{ entry.title }}</strong>: {{ entry.content }}</li>
+               {% endfor %}
+          </ul>
+     </body>
+</html>
