@@ -7,19 +7,6 @@ h1 {
      color: #333;
 }
 
-form {
-     margin-bottom: 20px;
-}
-
-label {
-     display: block;
-     margin-top: 10px;
-}
-
-button {
-     margin-top: 10px;
-}
-
 ul {
      list-style-type: none;
      padding: 0;
@@ -27,8 +14,4 @@ ul {
 
 li {
      margin: 10px 0;
-}
-
-form {
-     display: inline;
 }

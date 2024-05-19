@@ -26,16 +26,14 @@ def index():
     entries = Entry.query.all()
     return render_template('index.html', entries=entries)
 
-@app.route('/add', methods=['GET', 'POST'])
+@app.route('/add', methods=['POST'])
 def add_entry():
-    if request.method == 'POST':
-        title = request.form['title']
-        content = request.form['content']
-        new_entry = Entry(title=title, content=content)
-        db.session.add(new_entry)
-        db.session.commit()
-        return redirect(url_for('index'))
-    return render_template('add_entry.html')
+    title = request.form['title']
+    content = request.form['content']
+    new_entry = Entry(title=title, content=content)
+    db.session.add(new_entry)
+    db.session.commit()
+    return redirect(url_for('index'))
 
 @app.route('/delete/<int:entry_id>', methods=['POST'])
 def delete_entry(entry_id):
@@ -43,11 +41,6 @@ def delete_entry(entry_id):
     db.session.delete(entry)
     db.session.commit()
     return redirect(url_for('index'))
-
-@app.route('/entries')
-def view_entries():
-    entries = Entry.query.all()
-    return render_template('view_entries.html', entries=entries)
 
 if __name__ == '__main__':
     app.run(debug=True)
