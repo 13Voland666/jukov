@@ -12,7 +12,15 @@
           <a href="{{ url_for('add_entry') }}">Add New Entry</a>
           <ul>
                {% for entry in entries %}
-               <li><strong>{{ entry.title }}</strong>: {{ entry.content }}</li>
+               <li>
+                    <strong>{{ entry.title }}</strong>: {{ entry.content }}
+                    <form
+                         action="{{ url_for('delete_entry', entry_id=entry.id) }}"
+                         method="post"
+                         style="display: inline">
+                         <button type="submit">Delete</button>
+                    </form>
+               </li>
                {% endfor %}
           </ul>
      </body>
