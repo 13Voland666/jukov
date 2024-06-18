@@ -102,8 +102,9 @@ def login():
             session['user_id'] = user.id
             return redirect(url_for('index'))
         else:
-            flash('Login Unsuccessful. Please check username and password', 'danger')
-    return render_template('login.html', form=form)
+            flash('Incorrect username or password. Please try again.', 'danger')
+    return render_template('home.html', register_form=RegistrationForm(), login_form=form)
+
 
 # Маршрут для выхода
 @app.route('/logout')
