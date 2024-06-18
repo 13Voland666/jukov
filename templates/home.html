@@ -59,7 +59,14 @@
                                         register_form.username.label(class="form-control-label")
                                         }} {{
                                         register_form.username(class="form-control",
-                                        value=register_form.username.data) }}
+                                        value=register_form.username.data) }} {%
+                                        if register_form.username.errors %}
+                                        <small class="form-text text-danger"
+                                             >{{
+                                             register_form.username.errors[0]
+                                             }}</small
+                                        >
+                                        {% endif %}
                                    </div>
                                    <div class="form-group">
                                         {{

@@ -11,6 +11,10 @@ from wtforms import StringField, PasswordField, SubmitField, ValidationError
 def passwords_match(form, field):
     if form.password.data != form.confirm_password.data:
         raise ValidationError('Passwords must match')
+# Кастомный валидатор для проверки уникальности имени пользователя
+def unique_username(form, field):
+    if User.query.filter_by(username=field.data).first():
+        raise ValidationError('This username is already taken. Please choose a different one.')
 
 
     
@@ -46,9 +50,9 @@ with app.app_context():
 
 # Форма регистрации
 class RegistrationForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired(), Length(min=4, max=150)])
+    username = StringField('Username', validators=[DataRequired(), Length(min=4, max=150), unique_username])
     password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
-    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), Length(min=6), passwords_match])
+    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Register')
     
 
@@ -72,14 +76,21 @@ def register():
     if form.validate_on_submit():
         username = form.username.data
         password = form.password.data
+        
+        # Проверка наличия пользователя с таким именем
+        existing_user = User.query.filter_by(username=username).first()
+        if existing_user:
+            flash('This username is already taken. Please choose a different one.', 'danger')
+            return render_template('home.html', register_form=form, login_form=LoginForm())
+        
         hashed_password = generate_password_hash(password)
         new_user = User(username=username, password_hash=hashed_password)
         db.session.add(new_user)
         db.session.commit()
         session['user_id'] = new_user.id
         return redirect(url_for('index'))
+    
     return render_template('home.html', register_form=form, login_form=LoginForm())
-
 
 # Маршрут для входа
 @app.route('/login', methods=['GET', 'POST'])
