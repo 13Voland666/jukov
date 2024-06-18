@@ -5,7 +5,17 @@ from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, EqualTo, Length
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
+from wtforms import StringField, PasswordField, SubmitField, ValidationError
 
+# Кастомный валидатор для проверки совпадения паролей
+def passwords_match(form, field):
+    if form.password.data != form.confirm_password.data:
+        raise ValidationError('Passwords must match')
+
+
+    
+    
+    
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
 
@@ -38,8 +48,9 @@ with app.app_context():
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired(), Length(min=4, max=150)])
     password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
-    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
+    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), Length(min=6), passwords_match])
     submit = SubmitField('Register')
+    
 
 # Форма входа
 class LoginForm(FlaskForm):
@@ -67,7 +78,8 @@ def register():
         db.session.commit()
         session['user_id'] = new_user.id
         return redirect(url_for('index'))
-    return render_template('register.html', form=form)
+    return render_template('home.html', register_form=form, login_form=LoginForm())
+
 
 # Маршрут для входа
 @app.route('/login', methods=['GET', 'POST'])
