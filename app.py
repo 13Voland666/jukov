@@ -16,16 +16,12 @@ def unique_username(form, field):
     if User.query.filter_by(username=field.data).first():
         raise ValidationError('This username is already taken. Please choose a different one.')
 
-
-    
-    
-    
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
 
 # Настройки базы данных
 basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'app.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:13666@localhost/notes'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -54,7 +50,6 @@ class RegistrationForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Register')
-    
 
 # Форма входа
 class LoginForm(FlaskForm):
@@ -76,20 +71,20 @@ def register():
     if form.validate_on_submit():
         username = form.username.data
         password = form.password.data
-        
+
         # Проверка наличия пользователя с таким именем
         existing_user = User.query.filter_by(username=username).first()
         if existing_user:
             flash('This username is already taken. Please choose a different one.', 'danger')
             return render_template('home.html', register_form=form, login_form=LoginForm())
-        
+
         hashed_password = generate_password_hash(password)
         new_user = User(username=username, password_hash=hashed_password)
         db.session.add(new_user)
         db.session.commit()
         session['user_id'] = new_user.id
         return redirect(url_for('index'))
-    
+
     return render_template('home.html', register_form=form, login_form=LoginForm())
 
 # Маршрут для входа
@@ -104,7 +99,6 @@ def login():
         else:
             flash('Incorrect username or password. Please try again.', 'danger')
     return render_template('home.html', register_form=RegistrationForm(), login_form=form)
-
 
 # Маршрут для выхода
 @app.route('/logout')
