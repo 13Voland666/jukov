@@ -64,28 +64,21 @@ def home():
     login_form = LoginForm()
     return render_template('home.html', register_form=register_form, login_form=login_form)
 
-# Маршрут для регистрации
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
-        username = form.username.data
-        password = form.password.data
-
-        # Проверка наличия пользователя с таким именем
-        existing_user = User.query.filter_by(username=username).first()
+        existing_user = User.query.filter_by(username=form.username.data).first()
         if existing_user:
-            flash('This username is already taken. Please choose a different one.', 'danger')
-            return render_template('home.html', register_form=form, login_form=LoginForm())
-
-        hashed_password = generate_password_hash(password)
-        new_user = User(username=username, password_hash=hashed_password)
-        db.session.add(new_user)
-        db.session.commit()
-        session['user_id'] = new_user.id
-        return redirect(url_for('index'))
-
+            form.username.errors.append('This username is already taken. Please choose a different one.')
+        else:
+            user = User(username=form.username.data, password_hash=generate_password_hash(form.password.data))
+            db.session.add(user)
+            db.session.commit()
+            flash('Registration successful! You can now log in.', 'success')
+            return redirect(url_for('index'))
     return render_template('home.html', register_form=form, login_form=LoginForm())
+
 
 # Маршрут для входа
 @app.route('/login', methods=['GET', 'POST'])
