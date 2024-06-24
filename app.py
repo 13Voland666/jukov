@@ -21,6 +21,7 @@ app.secret_key = 'supersecretkey'
 
 # Настройки базы данных
 basedir = os.path.abspath(os.path.dirname(__file__))
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:13666@localhost/notes'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
