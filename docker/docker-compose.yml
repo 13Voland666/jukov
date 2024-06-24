@@ -5,23 +5,7 @@ services:
           build: .
           ports:
                - "5000:5000"
+          environment:
+               FLASK_ENV: development
           volumes:
                - .:/app
-          depends_on:
-               - db
-          environment:
-               - FLASK_APP=app.py
-               - FLASK_RUN_HOST=0.0.0.0
-               - SQLALCHEMY_DATABASE_URI=postgresql://postgres:postgres@db:5432/notes
-
-     db:
-          image: postgres:13
-          environment:
-               POSTGRES_USER: postgres
-               POSTGRES_PASSWORD: postgres
-               POSTGRES_DB: notes
-          volumes:
-               - postgres_data:/var/lib/postgresql/data
-
-volumes:
-     postgres_data:
