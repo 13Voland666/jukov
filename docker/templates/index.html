@@ -1,10 +1,8 @@
-<!-- index.html -->
-
 <!DOCTYPE html>
 <html lang="en">
      <head>
           <meta charset="UTF-8" />
-          <title>Diary</title>
+          <title>Diary Entries</title>
           <link
                rel="stylesheet"
                href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
@@ -26,6 +24,12 @@
                     {% for entry in entries %}
                     <li class="list-group-item">
                          <strong>{{ entry.title }}</strong>: {{ entry.content }}
+                         {% if entry.image_path %}
+                         <img
+                              src="{{ entry.image_path }}"
+                              alt="Image"
+                              style="max-width: 200px; max-height: 200px" />
+                         {% endif %}
                          <form
                               action="{{ url_for('delete_entry', entry_id=entry.id) }}"
                               method="post"
@@ -38,84 +42,99 @@
                          </form>
                          <button
                               type="button"
-                              class="btn btn-primary btn-sm"
+                              class="btn btn-info btn-sm"
                               data-toggle="modal"
                               data-target="#editEntryModal{{ entry.id }}">
                               Edit
                          </button>
-                    </li>
-
-                    <!-- Modal for editing entry -->
-                    <div
-                         class="modal fade"
-                         id="editEntryModal{{ entry.id }}"
-                         tabindex="-1"
-                         role="dialog"
-                         aria-labelledby="editEntryModalLabel{{ entry.id }}"
-                         aria-hidden="true">
-                         <div class="modal-dialog" role="document">
-                              <div class="modal-content">
-                                   <div class="modal-header">
-                                        <h5
-                                             class="modal-title"
-                                             id="editEntryModalLabel{{ entry.id }}">
-                                             Edit Entry
-                                        </h5>
-                                        <button
-                                             type="button"
-                                             class="close"
-                                             data-dismiss="modal"
-                                             aria-label="Close">
-                                             <span aria-hidden="true"
-                                                  >&times;</span
-                                             >
-                                        </button>
-                                   </div>
-                                   <div class="modal-body">
-                                        <form
-                                             id="editEntryForm{{ entry.id }}"
-                                             action="{{ url_for('edit_entry', entry_id=entry.id) }}"
-                                             method="post">
-                                             <div class="form-group">
-                                                  <label for="title"
-                                                       >Title</label
-                                                  >
-                                                  <input
-                                                       type="text"
-                                                       class="form-control"
-                                                       id="title"
-                                                       name="title"
-                                                       value="{{ entry.title }}"
-                                                       required />
-                                             </div>
-                                             <div class="form-group">
-                                                  <label for="content"
-                                                       >Content</label
-                                                  >
-                                                  <textarea
-                                                       class="form-control"
-                                                       id="content"
-                                                       name="content"
-                                                       required>
-{{ entry.content }}</textarea
-                                                  >
-                                             </div>
+                         <!-- Modal for editing entry -->
+                         <div
+                              class="modal fade"
+                              id="editEntryModal{{ entry.id }}"
+                              tabindex="-1"
+                              role="dialog"
+                              aria-labelledby="editEntryModalLabel{{ entry.id }}"
+                              aria-hidden="true">
+                              <div class="modal-dialog" role="document">
+                                   <div class="modal-content">
+                                        <div class="modal-header">
+                                             <h5
+                                                  class="modal-title"
+                                                  id="editEntryModalLabel{{ entry.id }}">
+                                                  Edit Entry
+                                             </h5>
                                              <button
                                                   type="button"
-                                                  class="btn btn-secondary"
-                                                  data-dismiss="modal">
-                                                  Close
+                                                  class="close"
+                                                  data-dismiss="modal"
+                                                  aria-label="Close">
+                                                  <span aria-hidden="true"
+                                                       >&times;</span
+                                                  >
                                              </button>
-                                             <button
-                                                  type="submit"
-                                                  class="btn btn-primary">
-                                                  Save Changes
-                                             </button>
-                                        </form>
+                                        </div>
+                                        <div class="modal-body">
+                                             <form
+                                                  action="{{ url_for('edit_entry', entry_id=entry.id) }}"
+                                                  method="post">
+                                                  <div class="form-group">
+                                                       <label for="title"
+                                                            >Title</label
+                                                       >
+                                                       <input
+                                                            type="text"
+                                                            class="form-control"
+                                                            id="title"
+                                                            name="title"
+                                                            value="{{ entry.title }}"
+                                                            required />
+                                                  </div>
+                                                  <div class="form-group">
+                                                       <label for="content"
+                                                            >Content</label
+                                                       >
+                                                       <textarea
+                                                            class="form-control"
+                                                            id="content"
+                                                            name="content"
+                                                            rows="3"
+                                                            required>
+{{ entry.content }}</textarea
+                                                       >
+                                                  </div>
+                                                  <button
+                                                       type="submit"
+                                                       class="btn btn-primary">
+                                                       Save Changes
+                                                  </button>
+                                             </form>
+                                             <!-- Form to add image -->
+                                             <form
+                                                  id="addImageForm{{ entry.id }}"
+                                                  action="{{ url_for('add_image', entry_id=entry.id) }}"
+                                                  method="post"
+                                                  enctype="multipart/form-data">
+                                                  <div class="form-group">
+                                                       <label for="image"
+                                                            >Add Image</label
+                                                       >
+                                                       <input
+                                                            type="file"
+                                                            class="form-control-file"
+                                                            id="image"
+                                                            name="image" />
+                                                  </div>
+                                                  <button
+                                                       type="submit"
+                                                       class="btn btn-primary">
+                                                       Upload Image
+                                                  </button>
+                                             </form>
+                                        </div>
                                    </div>
                               </div>
                          </div>
-                    </div>
+                    </li>
                     {% endfor %}
                </ul>
           </div>
@@ -161,18 +180,13 @@
                                              class="form-control"
                                              id="content"
                                              name="content"
+                                             rows="3"
                                              required></textarea>
                                    </div>
                                    <button
-                                        type="button"
-                                        class="btn btn-secondary"
-                                        data-dismiss="modal">
-                                        Close
-                                   </button>
-                                   <button
                                         type="submit"
                                         class="btn btn-primary">
-                                        Save Entry
+                                        Add Entry
                                    </button>
                               </form>
                          </div>

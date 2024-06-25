@@ -1,24 +1,12 @@
-# app.py
-
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, EqualTo, Length
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
+from datetime import datetime
 import os
-from wtforms import StringField, PasswordField, SubmitField, ValidationError
-from datetime import datetime  # Добавляем импорт для работы с временем
-
-# Кастомный валидатор для проверки совпадения паролей
-def passwords_match(form, field):
-    if form.password.data != form.confirm_password.data:
-        raise ValidationError('Passwords must match')
-
-# Кастомный валидатор для проверки уникальности имени пользователя
-def unique_username(form, field):
-    if User.query.filter_by(username=field.data).first():
-        raise ValidationError('This username is already taken. Please choose a different one.')
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
@@ -28,6 +16,12 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'notes.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Настройки для загрузки изображений
+UPLOAD_FOLDER = 'static/images/'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 db = SQLAlchemy(app)
 
@@ -43,8 +37,8 @@ class Entry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     content = db.Column(db.Text, nullable=False)
+    image_path = db.Column(db.String(255))  # Путь к изображению
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 # Создание таблиц
 with app.app_context():
@@ -52,7 +46,7 @@ with app.app_context():
 
 # Форма регистрации
 class RegistrationForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired(), Length(min=4, max=150), unique_username])
+    username = StringField('Username', validators=[DataRequired(), Length(min=4, max=150)])
     password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Register')
@@ -62,6 +56,10 @@ class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Login')
+
+# Функция для проверки разрешённых расширений файлов
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Главная страница
 @app.route('/')
@@ -152,8 +150,35 @@ def edit_entry(entry_id):
         entry.content = request.form['content']
         db.session.commit()
         flash('Entry updated successfully!', 'success')
-        return redirect(url_for('index'))
+    return redirect(url_for('index'))
 
+# Маршрут для добавления изображения к заметке
+@app.route('/add_image/<int:entry_id>', methods=['POST'])
+def add_image(entry_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    entry = Entry.query.get_or_404(entry_id)
+    if entry.user_id != session['user_id']:
+        return redirect(url_for('index'))
+    if 'image' not in request.files:
+        flash('No file part', 'danger')
+        return redirect(url_for('index'))
+    file = request.files['image']
+    if file.filename == '':
+        flash('No selected file', 'danger')
+        return redirect(url_for('index'))
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        # Изменяем путь сохранения на абсолютный, указывая полный путь к файлу
+        file.save(os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], filename))
+        entry.image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        db.session.commit()
+        flash('Image uploaded successfully!', 'success')
+    else:
+        flash('Invalid file type. Allowed file types are png, jpg, jpeg, gif', 'danger')
+    return redirect(url_for('index'))
 print('Для запуска - http://127.0.0.1:5000/')
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True)
+
+
