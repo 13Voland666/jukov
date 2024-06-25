@@ -14,8 +14,10 @@ app.secret_key = 'supersecretkey'
 # Настройки базы данных
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'notes.db')
+# Настройки базы данных PostgreSQL
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:13666@localhost/New'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 
 # Настройки для загрузки изображений
 UPLOAD_FOLDER = 'static/images/'
