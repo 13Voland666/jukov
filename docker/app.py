@@ -15,7 +15,7 @@ app.secret_key = 'supersecretkey'
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 # Настройки базы данных PostgreSQL
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:13666@localhost/New'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:13666@localhost/WWW'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 
@@ -29,10 +29,14 @@ db = SQLAlchemy(app)
 
 # Модель данных для пользователей
 class User(db.Model):
+    __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(150), unique=True, nullable=False)
-    password_hash = db.Column(db.String(150), nullable=False)
-    entries = db.relationship('Entry', backref='author', lazy=True)
+    username = db.Column(db.String(10000), unique=True, nullable=False)  # Увеличение длины до 10000 символов
+    password_hash = db.Column(db.String(10000), nullable=False)  # Длина 10000 символов для password_hash
+
+    def __repr__(self):
+        return '<User %r>' % self.username
+
 
 # Модель данных для заметок
 class Entry(db.Model):
