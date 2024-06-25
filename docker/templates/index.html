@@ -1,3 +1,5 @@
+<!-- index.html -->
+
 <!DOCTYPE html>
 <html lang="en">
      <head>
@@ -34,12 +36,91 @@
                                    Delete
                               </button>
                          </form>
+                         <button
+                              type="button"
+                              class="btn btn-primary btn-sm"
+                              data-toggle="modal"
+                              data-target="#editEntryModal{{ entry.id }}">
+                              Edit
+                         </button>
                     </li>
+
+                    <!-- Modal for editing entry -->
+                    <div
+                         class="modal fade"
+                         id="editEntryModal{{ entry.id }}"
+                         tabindex="-1"
+                         role="dialog"
+                         aria-labelledby="editEntryModalLabel{{ entry.id }}"
+                         aria-hidden="true">
+                         <div class="modal-dialog" role="document">
+                              <div class="modal-content">
+                                   <div class="modal-header">
+                                        <h5
+                                             class="modal-title"
+                                             id="editEntryModalLabel{{ entry.id }}">
+                                             Edit Entry
+                                        </h5>
+                                        <button
+                                             type="button"
+                                             class="close"
+                                             data-dismiss="modal"
+                                             aria-label="Close">
+                                             <span aria-hidden="true"
+                                                  >&times;</span
+                                             >
+                                        </button>
+                                   </div>
+                                   <div class="modal-body">
+                                        <form
+                                             id="editEntryForm{{ entry.id }}"
+                                             action="{{ url_for('edit_entry', entry_id=entry.id) }}"
+                                             method="post">
+                                             <div class="form-group">
+                                                  <label for="title"
+                                                       >Title</label
+                                                  >
+                                                  <input
+                                                       type="text"
+                                                       class="form-control"
+                                                       id="title"
+                                                       name="title"
+                                                       value="{{ entry.title }}"
+                                                       required />
+                                             </div>
+                                             <div class="form-group">
+                                                  <label for="content"
+                                                       >Content</label
+                                                  >
+                                                  <textarea
+                                                       class="form-control"
+                                                       id="content"
+                                                       name="content"
+                                                       required>
+{{ entry.content }}</textarea
+                                                  >
+                                             </div>
+                                             <button
+                                                  type="button"
+                                                  class="btn btn-secondary"
+                                                  data-dismiss="modal">
+                                                  Close
+                                             </button>
+                                             <button
+                                                  type="submit"
+                                                  class="btn btn-primary">
+                                                  Save Changes
+                                             </button>
+                                        </form>
+                                   </div>
+                              </div>
+                         </div>
+                    </div>
                     {% endfor %}
                </ul>
           </div>
 
-          <!-- Add Entry Modal -->
+          <!-- Modal for adding new entry -->
           <div
                class="modal fade"
                id="addEntryModal"
@@ -63,7 +144,6 @@
                          </div>
                          <div class="modal-body">
                               <form
-                                   id="addEntryForm"
                                    action="{{ url_for('add_entry') }}"
                                    method="post">
                                    <div class="form-group">
@@ -83,21 +163,18 @@
                                              name="content"
                                              required></textarea>
                                    </div>
+                                   <button
+                                        type="button"
+                                        class="btn btn-secondary"
+                                        data-dismiss="modal">
+                                        Close
+                                   </button>
+                                   <button
+                                        type="submit"
+                                        class="btn btn-primary">
+                                        Save Entry
+                                   </button>
                               </form>
-                         </div>
-                         <div class="modal-footer">
-                              <button
-                                   type="button"
-                                   class="btn btn-secondary"
-                                   data-dismiss="modal">
-                                   Close
-                              </button>
-                              <button
-                                   type="submit"
-                                   form="addEntryForm"
-                                   class="btn btn-primary">
-                                   Save Entry
-                              </button>
                          </div>
                     </div>
                </div>

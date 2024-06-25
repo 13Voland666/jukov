@@ -1,3 +1,5 @@
+# app.py
+
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
@@ -6,11 +8,13 @@ from wtforms.validators import DataRequired, EqualTo, Length
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 from wtforms import StringField, PasswordField, SubmitField, ValidationError
+from datetime import datetime  # Добавляем импорт для работы с временем
 
 # Кастомный валидатор для проверки совпадения паролей
 def passwords_match(form, field):
     if form.password.data != form.confirm_password.data:
         raise ValidationError('Passwords must match')
+
 # Кастомный валидатор для проверки уникальности имени пользователя
 def unique_username(form, field):
     if User.query.filter_by(username=field.data).first():
@@ -40,6 +44,7 @@ class Entry(db.Model):
     title = db.Column(db.String(100), nullable=False)
     content = db.Column(db.Text, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 # Создание таблиц
 with app.app_context():
@@ -65,6 +70,7 @@ def home():
     login_form = LoginForm()
     return render_template('home.html', register_form=register_form, login_form=login_form)
 
+# Маршрут для регистрации
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
@@ -77,9 +83,8 @@ def register():
             db.session.add(user)
             db.session.commit()
             flash('Registration successful! You can now log in.', 'success')
-            return redirect(url_for('index'))
+            return redirect(url_for('home'))
     return render_template('home.html', register_form=form, login_form=LoginForm())
-
 
 # Маршрут для входа
 @app.route('/login', methods=['GET', 'POST'])
@@ -133,6 +138,22 @@ def delete_entry(entry_id):
     db.session.delete(entry)
     db.session.commit()
     return redirect(url_for('index'))
+
+# Маршрут для редактирования заметки
+@app.route('/edit/<int:entry_id>', methods=['POST'])
+def edit_entry(entry_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    entry = Entry.query.get_or_404(entry_id)
+    if entry.user_id != session['user_id']:
+        return redirect(url_for('index'))
+    if request.method == 'POST':
+        entry.title = request.form['title']
+        entry.content = request.form['content']
+        db.session.commit()
+        flash('Entry updated successfully!', 'success')
+        return redirect(url_for('index'))
+
 print('Для запуска - http://127.0.0.1:5000/')
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
