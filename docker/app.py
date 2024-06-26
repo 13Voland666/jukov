@@ -15,7 +15,7 @@ app.secret_key = 'supersecretkey'
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 # Настройки базы данных PostgreSQL
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:13666@localhost/WWW'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:13666@db:5433/WWW'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 
